@@ -1,25 +1,52 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import {
+  BrowserRouter,
+  Route,
+  Switch,
+  Redirect
+} from 'react-router-dom'
+import Register from './components/signUp';
+import Login from './components/login';
+import Home from './components/home';
+import NotFound from './components/NotFound';
 
-function App() {
+export const isUserAuthenticated = () => {
+  let user = localStorage.getItem('auth_token');
+  if (user) {
+      return true;
+  } else {
+    return false;
+  }
+};
+
+ const PublicRoute = ({ component: Component, ...rest }) => {
+      return (<Route {...rest} render={(routeProps) => (
+        isUserAuthenticated()
+          ? <Redirect to='/' /> : <Component {...routeProps} />
+      )} />
+      );
+    };
+
+
+ const PrivateRoute = ({ component: Component, ...rest }) => {
+      return (<Route {...rest} render={(routeProps) => (
+        isUserAuthenticated()
+          ? <Component {...routeProps} /> : <Redirect to='/login' />
+      )} />
+      );
+    };
+
+
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <BrowserRouter >
+      <Switch>
+        <PublicRoute exact path="/sign-up" component={Register} />
+        <PrivateRoute exact path="/" component={Home} />
+        <PublicRoute exact path="/login" component={Login}/>
+        <Route exact path="*" component={NotFound}/>
+      </Switch>
+    </BrowserRouter>
   );
 }
 
